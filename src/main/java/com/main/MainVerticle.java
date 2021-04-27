@@ -1,10 +1,12 @@
 package com.main;
 
   import com.operations.PreparedStatementOperation;
+  import com.util.Months;
   import io.vertx.core.AbstractVerticle;
   import io.vertx.core.MultiMap;
   import io.vertx.core.Promise;
   import io.vertx.core.Vertx;
+  import io.vertx.core.json.JsonArray;
   import io.vertx.core.json.JsonObject;
   import io.vertx.ext.web.Router;
   import io.vertx.jdbcclient.JDBCConnectOptions;
@@ -27,17 +29,23 @@ public class MainVerticle extends AbstractVerticle {
       String address = context.request().connection().remoteAddress().toString();
       MultiMap queryParams = context.queryParams();
 
+      JsonArray days = new JsonArray();
+      for (int i = 1; i <= Months.JAN.getMonthDays(); i++) {
+        days.add(i);
+      }
+
       context.json(
         new JsonObject()
           .put("sign", queryParams.get("sign"))
           .put("dates", aquariusDates)
+          .put("January", days)
       );
     });
 
     vertx.createHttpServer()
       .requestHandler(router)
       .listen(8888)
-      .onSuccess(server -> System.out.println("HTTP server started on port " + server.actualPort()));
+      .onSuccess(server -> System.out.println("-----------------\nVertx test: HTTP server started on port " + server.actualPort()));
 
   }//start
 }//Main Verticle
