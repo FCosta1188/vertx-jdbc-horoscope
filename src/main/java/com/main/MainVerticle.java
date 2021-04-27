@@ -31,6 +31,7 @@ public class MainVerticle extends AbstractVerticle {
         new JsonObject()
           .put("sign", queryParams.get("sign"))
           .put("dates", aquariusDates)
+          .put("test", "TEST")
       );
     });
 
