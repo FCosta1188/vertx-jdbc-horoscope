@@ -22,34 +22,37 @@ public class MainVerticle extends AbstractVerticle {
   @Override
   public void start(Promise<Void> startPromise) throws Exception {
 
-    Router router = Router.router(vertx);
+    //PreparedStatementOperation pso = new PreparedStatementOperation();
+    //String aquariusDates = pso.select("Aquarius");
 
-    PreparedStatementOperation pso = new PreparedStatementOperation();
-    String aquariusDates = pso.select("Aquarius");
+    LocalDate today = LocalDate.now();
+    int currentYear = today.getYear();
+
+    JsonArray janDays = new JsonArray();
+    for (int i = 1; i <= Months.JAN.getMonthDays(); i++) {
+      janDays.add(i);
+    }
+    JsonArray febDays = new JsonArray();
+    for (int j = 1; j <= Months.FEB.getMonthDays(currentYear); j++) {
+      febDays.add(j);
+    }
+
+    String errors = null;
+
+    Router router = Router.router(vertx);
 
     router.route().handler(context -> {
       String address = context.request().connection().remoteAddress().toString();
       MultiMap queryParams = context.queryParams();
 
-      LocalDate today = LocalDate.now();
-      int currentYear = today.getYear();
-
-      JsonArray janDays = new JsonArray();
-      for (int i = 1; i <= Months.JAN.getMonthDays(); i++) {
-        janDays.add(i);
-      }
-      JsonArray febDays = new JsonArray();
-      for (int j = 1; j <= Months.FEB.getMonthDays(currentYear); j++) {
-        febDays.add(j);
-      }
-
       context.json(
         new JsonObject()
           .put("remote address", address)
           .put("sign", queryParams.get("sign"))
-          .put("dates", aquariusDates)
+          //.put("dates", aquariusDates)
           .put(Months.JAN.getMonthName(), janDays)
           .put(Months.FEB.getMonthName(), febDays)
+          .put("Errors", errors)
       );
     });
 
