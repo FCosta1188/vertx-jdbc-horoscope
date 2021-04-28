@@ -14,6 +14,8 @@ package com.main;
   import io.vertx.sqlclient.PoolOptions;
   import io.vertx.ext.sql.SQLConnection;
 
+  import java.time.LocalDate;
+
 public class MainVerticle extends AbstractVerticle {
 
   //TEST URL: http://localhost:8888/?sign=Aquarius
@@ -29,16 +31,25 @@ public class MainVerticle extends AbstractVerticle {
       String address = context.request().connection().remoteAddress().toString();
       MultiMap queryParams = context.queryParams();
 
-      JsonArray days = new JsonArray();
+      LocalDate today = LocalDate.now();
+      int currentYear = today.getYear();
+
+      JsonArray janDays = new JsonArray();
       for (int i = 1; i <= Months.JAN.getMonthDays(); i++) {
-        days.add(i);
+        janDays.add(i);
+      }
+      JsonArray febDays = new JsonArray();
+      for (int j = 1; j <= Months.FEB.getMonthDays(currentYear); j++) {
+        febDays.add(j);
       }
 
       context.json(
         new JsonObject()
+          .put("remote address", address)
           .put("sign", queryParams.get("sign"))
           .put("dates", aquariusDates)
-          .put("January", days)
+          .put(Months.JAN.getMonthName(), janDays)
+          .put(Months.FEB.getMonthName(), febDays)
       );
     });
 
