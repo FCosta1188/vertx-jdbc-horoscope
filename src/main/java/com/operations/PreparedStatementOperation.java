@@ -19,6 +19,8 @@ public class PreparedStatementOperation {
 
 	private static final String INSERT_ROW = "INSERT vertx.horoscope(year,sign,month,day_score) VALUES (?,?,?,?)";
 
+	private static final String RESET_ID = "ALTER TABLE vertx.horoscope AUTO_INCREMENT = ?";
+
 	//Constructor
 	public PreparedStatementOperation() {
 
@@ -107,5 +109,23 @@ public class PreparedStatementOperation {
 
 		return msg;
 	}//insertRow()
+
+	public String resetId(int resetValue) {
+
+		String msg = "";
+
+		try {
+			if (cxn != null) {
+				PreparedStatement pstmt = cxn.prepareStatement(RESET_ID);
+				pstmt.setInt(1, resetValue);
+				int resetIdOutput = pstmt.executeUpdate();
+				msg = resetIdOutput == 1 ? "RESET_ID SUCCESS" : "RESET_ID ERROR";
+			}
+		} catch (SQLException ex) {
+			msg = "RESET_ID SQL EXCEPTION: " + ex.toString();
+		}
+
+		return msg;
+	}
 
 }//PreparedStatementOperation

@@ -50,8 +50,9 @@ public enum Months {
       } else {
           return MONTH_DAYS;
       }
-    } else
-        return MONTH_DAYS;
+    } else {
+      return MONTH_DAYS;
+    }
   }
 
   @Override

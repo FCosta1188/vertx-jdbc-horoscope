@@ -18,11 +18,17 @@ public class MainProgram {
     System.out.println("-----------------");
     System.out.println("DB Connection test: " + dbc.getConnection());
 
+    System.out.println("-----------------");
     PreparedStatementOperation pso = new PreparedStatementOperation();
+    //System.out.println("-----------------");
+    //System.out.println("DB INSERT test: " + pso.insertRow(2022, "Gemini", "May", "29:10"));
+
+    HoroscopeCalendar horoscope = new HoroscopeCalendar();
     System.out.println("-----------------");
-    System.out.println("DB SELECT_ALL test: " + pso.selectRows("", "").toString());
+    System.out.println("GENERATE YEARLY CALENDAR test: " + horoscope.generateYearlyCalendar(2025));
+
     System.out.println("-----------------");
-    System.out.println("DB INSERT test: " + pso.insertRow(2019, "Gemini", "May", "29:10"));
+    System.out.println("DB SELECT_ALL test: " + pso.selectRows("", "").size());
 
     LocalDate today = LocalDate.now();
     int currentYear = today.getYear();
