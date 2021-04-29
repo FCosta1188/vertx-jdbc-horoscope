@@ -6,14 +6,16 @@ public class DBRow {
   private int year;
   private String sign;
   private String month;
-  private String day_score;
+  private int day;
+  private int score;
 
-  public DBRow(int id, int year, String sign, String month, String day_score) {
+  public DBRow(int id, int year, String sign, String month, int day, int score) {
     this.id = id;
     this.year = year;
     this.sign = sign;
     this.month = month;
-    this.day_score = day_score;
+    this.day = day;
+    this.score = score;
   }
 
   public int getId() {
@@ -32,8 +34,36 @@ public class DBRow {
     return month;
   }
 
-  public String getDay_score() {
-    return day_score;
+  public int getDay() {
+    return day;
+  }
+
+  public int getScore() {
+    return score;
+  }
+
+  public void setId(int id) {
+    this.id = id;
+  }
+
+  public void setYear(int year) {
+    this.year = year;
+  }
+
+  public void setSign(String sign) {
+    this.sign = sign;
+  }
+
+  public void setMonth(String month) {
+    this.month = month;
+  }
+
+  public void setDay(int day) {
+    this.day = day;
+  }
+
+  public void setScore(int score) {
+    this.score = score;
   }
 
   @Override
@@ -43,7 +73,8 @@ public class DBRow {
             ", year=" + year +
             ", sign='" + sign + '\'' +
             ", month='" + month + '\'' +
-            ", day_score='" + day_score + '\'' +
+            ", day=" + day +
+            ", score=" + score +
             '}';
   }
 

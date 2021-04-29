@@ -11,13 +11,15 @@ public class PreparedStatementOperation {
 	private Connection cxn = null;
 
 	private static final String SELECT_ALL = "SELECT * FROM vertx.horoscope";
+	private static final String SELECT_ROW = "SELECT * FROM vertx.horoscope WHERE year = ? AND sign = ? AND month = ? AND day = ?";
 	private static final String SELECT_ROWS_byID = "SELECT * FROM vertx.horoscope WHERE id = ?";
 	private static final String SELECT_ROWS_byYEAR = "SELECT * FROM vertx.horoscope WHERE year = ?";
 	private static final String SELECT_ROWS_bySIGN = "SELECT * FROM vertx.horoscope WHERE sign = ?";
 	private static final String SELECT_ROWS_byMONTH = "SELECT * FROM vertx.horoscope WHERE month = ?";
-	private static final String SELECT_ROWS_byDAY_SCORE = "SELECT * FROM vertx.horoscope WHERE day_score = ?";
+	private static final String SELECT_ROWS_byDAY = "SELECT * FROM vertx.horoscope WHERE day = ?";
+	private static final String SELECT_ROWS_bySCORE = "SELECT * FROM vertx.horoscope WHERE score = ?";
 
-	private static final String INSERT_ROW = "INSERT vertx.horoscope(year,sign,month,day_score) VALUES (?,?,?,?)";
+	private static final String INSERT_ROW = "INSERT vertx.horoscope(year,sign,month,day,score) VALUES (?,?,?,?,?)";
 
 	private static final String RESET_ID = "ALTER TABLE vertx.horoscope AUTO_INCREMENT = ?";
 
@@ -33,6 +35,34 @@ public class PreparedStatementOperation {
 				ex.printStackTrace();
 		}
 
+	}
+
+	public DBRow selectRow(int year, String sign, String month, int day) {
+		DBRow row = new DBRow(0, 0,"", "", 0, 0);
+
+		try {
+			if (cxn != null) {
+				PreparedStatement pstmt = cxn.prepareStatement(SELECT_ROW);
+				pstmt.setInt(1, year);
+				pstmt.setString(2, sign);
+				pstmt.setString(3, month);
+				pstmt.setInt(4, day);
+
+				ResultSet rs = pstmt.executeQuery();
+				while (rs.next()) {
+					row.setId(rs.getInt("id"));
+					row.setYear(rs.getInt("year"));
+					row.setSign(rs.getString("sign"));
+					row.setMonth(rs.getString("month"));
+					row.setDay(rs.getInt("day"));
+					row.setScore(rs.getInt("score"));
+				}
+			}
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		}
+
+		return row;
 	}
 
 	public ArrayList<DBRow> selectRows(String filterColumn, String filterValue) { //Select all rows if input parameters are ""
@@ -56,8 +86,11 @@ public class PreparedStatementOperation {
 					case "month":
 						pstmt = cxn.prepareStatement(SELECT_ROWS_byMONTH);
 						break;
-					case "day_score":
-						pstmt = cxn.prepareStatement(SELECT_ROWS_byDAY_SCORE);
+					case "day":
+						pstmt = cxn.prepareStatement(SELECT_ROWS_byDAY);
+						break;
+					case "score":
+						pstmt = cxn.prepareStatement(SELECT_ROWS_bySCORE);
 						break;
 					default:
 						pstmt = cxn.prepareStatement(SELECT_ALL);
@@ -79,7 +112,8 @@ public class PreparedStatementOperation {
 							rs.getInt("year"),
 							rs.getString("sign"),
 							rs.getString("month"),
-							rs.getString("day_score")
+							rs.getInt("day"),
+							rs.getInt("score")
 							));
 				}
 			}
@@ -89,7 +123,7 @@ public class PreparedStatementOperation {
 		return rows;
 	}//selectRows
 
-	public String insertRow(int year, String sign, String month, String day_score) {
+	public String insertRow(int year, String sign, String month, int day, int score) {
 
 		String msg = "";
 
@@ -99,7 +133,8 @@ public class PreparedStatementOperation {
 					pstmt.setInt(1, year);
 					pstmt.setString(2, sign);
 					pstmt.setString(3, month);
-					pstmt.setString(4, day_score);
+					pstmt.setInt(4, day);
+					pstmt.setInt(5, score);
 					int insertOutput = pstmt.executeUpdate();
 					msg = insertOutput == 1 ? "INSERT SUCCESS" : "INSERT ERROR";
 			}

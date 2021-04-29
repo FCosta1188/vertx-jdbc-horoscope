@@ -26,6 +26,32 @@ public class HoroscopeCalendar {
     "Pisces"
   };
 
+  private final String[] SENTENCE_DAY_QUALITY = {
+          "Awful", //day score = 1
+          "Terrible",//2
+          "Shitty",//3
+          "Bad",//4
+          "Regular",//5
+          "Excellent",//6
+          "Great",//7
+          "Awesome",//8
+          "Incredible",//9
+          "Superb",//10
+  };
+
+  private final String[] SENTENCE_DAY_ACTION = {
+          "Stay home!", //day score = 1
+          "test",//2
+          "test",//3
+          "test",//4
+          "test",//5
+          "test",//6
+          "test",//7
+          "test",//8
+          "test",//9
+          "Go buy lottery tickets!",//10
+  };
+
   public HoroscopeCalendar() {
   }
 
@@ -36,7 +62,7 @@ public class HoroscopeCalendar {
     int currentYear = today.getYear();
 
     if (year < currentYear) {
-      msg = "Cannot create past calendars";
+      msg = "Cannot generate calendars before " + currentYear;
       return msg;
     }
 
@@ -45,7 +71,7 @@ public class HoroscopeCalendar {
     System.out.println(filteredRows.toString());
 
     if (filteredRows.size() > 0) {
-      msg = "Calendar for selected year already exists";
+      msg = "No new calendar generated (already exists)";
       return msg;
     }
 
@@ -58,14 +84,11 @@ public class HoroscopeCalendar {
       for (Months month : Months.values()) {
         for (int i = 1; i <= month.getMonthDays(year); i++) {
           int dailyScore = rnd.nextInt(10) + 1;
-          String day_score = String.valueOf(i).concat(":day score ").concat(String.valueOf(dailyScore));
-          //day_score += i + "-day score " + dailyScore;
-          System.out.println(day_score);
-          pso.insertRow(year, sign, month.getMonthName(), String.valueOf(day_score));
+          pso.insertRow(year, sign, month.getMonthName(), i, dailyScore);
         }
       }
     }
-    msg = "Calendar generated successfully";
+    msg = "New calendar generated";
 
     return msg;
   }
@@ -84,8 +107,12 @@ public class HoroscopeCalendar {
   }
 
   //Bonus task
-  String getDailySentence(int year, String sign, String month, String day_score) {
-    return "test";
+  String getDailySentence(int year, String sign, String month, int day) {
+
+    PreparedStatementOperation pso = new PreparedStatementOperation();
+    DBRow row = pso.selectRow(year, sign, month, day);
+
+    return SENTENCE_DAY_QUALITY[row.getScore()-1] + " day ahead, " + SENTENCE_DAY_ACTION[row.getScore()-1];
   }
 
 }//HoroscopeCalendar
