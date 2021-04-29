@@ -1,96 +1,111 @@
 package com.operations;
 
 import com.util.DBConnection;
+import com.util.DBRow;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 public class PreparedStatementOperation {
 
-    private Connection cxn = null;
-    private static final String SELECT = "SELECT signDates FROM vertx.horoscope WHERE sign = ?";
-    private static final String INSERT = "INSERT user(first_name,last_name, email, country) VALUES (?, ?,?, ?)";
-    private static final String UPDATE = "UPDATE user SET first_name = ?,last_name=?, email = ?, country = ? WHERE id = ?";
-    private static final String DELETE = "DELETE FROM user WHERE id = ?";
+	private Connection cxn = null;
 
-    public PreparedStatementOperation() {
-        try {
-            cxn = DBConnection.getConnection();
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
+	private static final String SELECT_ALL = "SELECT * FROM vertx.horoscope";
+	private static final String SELECT_ROWS_byID = "SELECT * FROM vertx.horoscope WHERE id = ?";
+	private static final String SELECT_ROWS_byYEAR = "SELECT * FROM vertx.horoscope WHERE year = ?";
+	private static final String SELECT_ROWS_bySIGN = "SELECT * FROM vertx.horoscope WHERE sign = ?";
+	private static final String SELECT_ROWS_byMONTH = "SELECT * FROM vertx.horoscope WHERE month = ?";
+	private static final String SELECT_ROWS_byDAY_SCORE = "SELECT * FROM vertx.horoscope WHERE day_score = ?";
 
-    public String select(String sign) {
-        try {
-            if (cxn != null) {
-                //SELECT
-                PreparedStatement pstmt = cxn.prepareStatement(SELECT);
-                pstmt.setString(1, sign);
-                ResultSet rs = pstmt.executeQuery();
-                boolean next = rs.next();
-                if (next) {
-                    //int id = rs.getInt("id");
-                    String dates = rs.getString("signDates");
-                    return dates;
-                } else {
-                    return "-1";
-                }
-            } else {
-                return "-1";
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-            return "-1";
-        }
-    }
+	private static final String INSERT_ROW = "INSERT vertx.horoscope(year,sign,month,day_score) VALUES (?,?,?,?)";
 
-    public void insert(String firstName, String lastName, String email, String country) {
-        try {
-            if (cxn != null) {
-                //INSERT
-                PreparedStatement pstmt = cxn.prepareStatement(INSERT);
-                pstmt.setString(1, firstName);
-                pstmt.setString(2, lastName);
-                pstmt.setString(3, email);
-                pstmt.setString(4, country);
-                int ret = pstmt.executeUpdate();
-                System.out.println("Insert return: " + (ret == 1 ? "OK" : "ERROR"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
+	//Constructor
+	public PreparedStatementOperation() {
 
-    public void update(int id, String firstName, String lastName, String email, String country) {
-        try {
-            if (cxn != null) {
-                //UPDATE
-                PreparedStatement pstmt = cxn.prepareStatement(UPDATE);
-                pstmt.setString(1, firstName);
-                pstmt.setString(2, lastName);
-                pstmt.setString(3, email);
-                pstmt.setString(4, country);
-                pstmt.setInt(5, id);
-                int ret = pstmt.executeUpdate();
-                System.out.println("Update return: " + (ret == 1 ? "OK" : "ERROR"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
+		String msg = "";
 
-    public void delete(int id) {
-        try {
-            if (cxn != null) {
-                //DELETE
-                PreparedStatement pstmt = cxn.prepareStatement(DELETE);
-                pstmt.setInt(1, id);
-                int ret = pstmt.executeUpdate();
-                System.out.println("Delete return: " + (ret == 1 ? "OK" : "ERROR"));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
+		try {
+			cxn = DBConnection.getConnection();
+			System.out.println("PSO connection success");
+		} catch (SQLException ex) {
+				ex.printStackTrace();
+		}
 
-}
+	}
+
+	public ArrayList<DBRow> selectRows(String filterColumn, String filterValue) { //Select all rows if input parameters are ""
+		ArrayList<DBRow> rows = new ArrayList<DBRow>();
+
+		try {
+			if (cxn != null) {
+
+				PreparedStatement pstmt;
+
+				switch (filterColumn) {
+					case "id":
+						pstmt = cxn.prepareStatement(SELECT_ROWS_byID);
+						break;
+					case "year":
+						pstmt = cxn.prepareStatement(SELECT_ROWS_byYEAR);
+						break;
+					case "sign":
+						pstmt = cxn.prepareStatement(SELECT_ROWS_bySIGN);
+						break;
+					case "month":
+						pstmt = cxn.prepareStatement(SELECT_ROWS_byMONTH);
+						break;
+					case "day_score":
+						pstmt = cxn.prepareStatement(SELECT_ROWS_byDAY_SCORE);
+						break;
+					default:
+						pstmt = cxn.prepareStatement(SELECT_ALL);
+				}
+
+				if (!filterColumn.equals("")) {
+					if (filterColumn.equals("id") || filterColumn.equals("year"))
+						pstmt.setInt(1, Integer.parseInt(filterValue));
+					else
+						pstmt.setString(1, filterValue);
+				}
+
+				ResultSet rs = pstmt.executeQuery();
+
+				while (rs.next()) {
+						//int id = rs.getInt("id");
+						rows.add(new DBRow(
+							rs.getInt("id"),
+							rs.getInt("year"),
+							rs.getString("sign"),
+							rs.getString("month"),
+							rs.getString("day_score")
+							));
+				}
+			}
+		} catch (SQLException ex) {
+				ex.printStackTrace();
+		}
+		return rows;
+	}//selectRows
+
+	public String insertRow(int year, String sign, String month, String day_score) {
+
+		String msg = "";
+
+		try {
+			if (cxn != null) {
+					PreparedStatement pstmt = cxn.prepareStatement(INSERT_ROW);
+					pstmt.setInt(1, year);
+					pstmt.setString(2, sign);
+					pstmt.setString(3, month);
+					pstmt.setString(4, day_score);
+					int insertOutput = pstmt.executeUpdate();
+					msg = insertOutput == 1 ? "INSERT SUCCESS" : "INSERT ERROR";
+			}
+		} catch (SQLException ex) {
+				msg = "INSERT SQL EXCEPTION: " + ex.toString();
+		}
+
+		return msg;
+	}//insertRow()
+
+}//PreparedStatementOperation

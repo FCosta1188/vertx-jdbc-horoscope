@@ -5,7 +5,7 @@ import java.util.Random;
 
 public class HoroscopeCalendar {
 
-  private final String[] signs = {
+  private final String[] SIGNS = {
     "Aries",
     "Taurus",
     "Gemini",
@@ -23,7 +23,8 @@ public class HoroscopeCalendar {
   public HoroscopeCalendar() {
   }
 
-  public HoroscopeCalendar(int year) {
+  String generateCalendar(int year) {
+    String message = "";
     //Generate horoscope for given year and return message:
     //"Generated successfully"
     //"Unable to generate for input year (is prior to the current year)"
@@ -31,6 +32,8 @@ public class HoroscopeCalendar {
 
     Random rnd = new Random();
     int dailyScore = rnd.nextInt(10) + 1;
+
+    return message;
   }
 
   double getMonthlyAverage(int year, String sign, String month) {

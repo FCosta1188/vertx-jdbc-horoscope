@@ -15,47 +15,47 @@ public enum Months {
   NOV(11, "November", 30),
   DEC(12, "December", 31);
 
-  private final int monthNumber;
-  private final String monthName;
-  private final int monthDays;
+  private final int MONTH_NUMBER;
+  private final String MONTH_NAME;
+  private final int MONTH_DAYS;
 
   Months(int num, String name, int days) {
-    this.monthNumber = num;
-    this.monthName = name;
-    this.monthDays = days;
+    this.MONTH_NUMBER = num;
+    this.MONTH_NAME = name;
+    this.MONTH_DAYS = days;
   }
 
   public int getMonthNumber() {
-    return monthNumber;
+    return MONTH_NUMBER;
   }
 
   public String getMonthName() {
-    return monthName;
+    return MONTH_NAME;
   }
 
   public int getMonthDays() {
-    return monthDays;
+    return MONTH_DAYS;
   }
 
   public int getMonthDays(int year) { //Leap year calculation for FEB
-    if (monthNumber == 2) {
+    if (MONTH_NUMBER == 2) {
       if (year % 4 == 0) {
         if (year % 100 == 0) {
           if (year % 400 == 0)
-            return monthDays + 1;
+            return MONTH_DAYS + 1;
           else
-            return monthDays;
+            return MONTH_DAYS;
         } else
-            return monthDays + 1;
+            return MONTH_DAYS + 1;
       } else {
-          return monthDays;
+          return MONTH_DAYS;
       }
     } else
-        return monthDays;
+        return MONTH_DAYS;
   }
 
   @Override
   public String toString(){
-    return (monthNumber + "," + monthName + "," + monthDays);
+    return (MONTH_NUMBER + "," + MONTH_NAME + "," + MONTH_DAYS);
   }
 }

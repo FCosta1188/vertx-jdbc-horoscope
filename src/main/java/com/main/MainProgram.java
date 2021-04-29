@@ -18,6 +18,12 @@ public class MainProgram {
     System.out.println("-----------------");
     System.out.println("DB Connection test: " + dbc.getConnection());
 
+    PreparedStatementOperation pso = new PreparedStatementOperation();
+    System.out.println("-----------------");
+    System.out.println("DB SELECT_ALL test: " + pso.selectRows("", "").toString());
+    System.out.println("-----------------");
+    System.out.println("DB INSERT test: " + pso.insertRow(2019, "Gemini", "May", "29:10"));
+
     LocalDate today = LocalDate.now();
     int currentYear = today.getYear();
     System.out.println("-----------------");
