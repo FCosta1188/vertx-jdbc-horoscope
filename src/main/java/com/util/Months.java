@@ -9,8 +9,8 @@ public enum Months {
   MAY(5, "May", 31),
   JUN(6, "June", 30),
   JUL(7, "July", 31),
-  SEP(9, "September", 30),
   AUG(8, "August", 31),
+  SEP(9, "September", 30),
   OCT(10, "October", 31),
   NOV(11, "November", 30),
   DEC(12, "December", 31);
@@ -53,6 +53,21 @@ public enum Months {
     } else {
       return MONTH_DAYS;
     }
+  }
+
+  public static String getDaySuffix(String day) {
+    String suffix = "";
+
+    if (day.endsWith("1") && !day.equals("11"))
+      suffix = "st";
+    else if (day.endsWith("2") && !day.equals("12"))
+      suffix = "nd";
+    else if (day.endsWith("3") && !day.equals("13"))
+      suffix = "rd";
+    else
+      suffix = "th";
+
+    return suffix;
   }
 
   @Override

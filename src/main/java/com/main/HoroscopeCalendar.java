@@ -70,7 +70,7 @@ public class HoroscopeCalendar {
     }
 
     ArrayList<DBRow> filteredRows = pso.selectRows("year", String.valueOf(year));
-    System.out.println(filteredRows.toString());
+    //System.out.println(filteredRows.toString());
 
     if (filteredRows.size() > 0) {
       msg = "No new calendar generated (already exists)";
@@ -95,27 +95,27 @@ public class HoroscopeCalendar {
     return msg;
   }
 
-  double getMonthlyAverage(int monthlyScoresSum, int monthDays) {
-    return (double) monthlyScoresSum / (double) monthDays;
+  int getMonthlyAverage(int monthlyScoresSum, int monthDays) {
+    return (int) Math.round((double) monthlyScoresSum / (double) monthDays);
   }
 
-  double getMonthlyAverage(int[] monthlyScores) {
+  int getMonthlyAverage(int[] monthlyScores) {
     int scoreSum = 0;
 
     for (int score : monthlyScores) {
       scoreSum += score;
     }
 
-    return (double) scoreSum / monthlyScores.length;
+    return (int) Math.round((double) scoreSum / (double) monthlyScores.length);
   }
 
   ArrayList<String> getBestMonth(int year,  String sign) {
-    ArrayList<Double> monthlyAverages = new ArrayList<>();
+    ArrayList<Integer> monthlyAverages = new ArrayList<>();
     ArrayList<String> sameAverageMonths = new ArrayList<>();
-    String bestMonth = "";
-    double bestAverage = 0;
+    int bestAverage = 0;
 
     for (Months month : Months.values()) {
+
       ArrayList<DBRow> monthRows = pso.selectRows(year, sign, month.getMonthName());
       int monthScoreSum = 0;
         for (DBRow row : monthRows) {
@@ -126,25 +126,33 @@ public class HoroscopeCalendar {
       }
 
     for (Months month : Months.values()) {
-      double average = monthlyAverages.get(month.getMonthNumber() - 1); //ArrayList indexes start from 0, month indexes start from 1
+      int average = monthlyAverages.get(month.getMonthNumber() - 1); //ArrayList indexes start from 0, month indexes start from 1
 
       if (average >= bestAverage) {
-        if (average == bestAverage) {
-          if (sameAverageMonths.size() == 0) //add the initial bestAverage and bestMonth, if it's the first instance of equal averages
-            sameAverageMonths.add(bestMonth + "," + bestAverage);
-
-          sameAverageMonths.add(month.getMonthName() + "," + average);
-        }
+        sameAverageMonths.add(month.getMonthName() + "," + average);
         bestAverage = average;
-        bestMonth = month.getMonthName();
       }
+
+    }
+
+    //clean up monthlyAverages from possible average values lower than the max value
+    ArrayList<String> removeMonths = new ArrayList<>();
+    for (String str : sameAverageMonths) {
+      String[] strArr = str.split(",");
+      int a = Integer.parseInt(strArr[1]);
+
+      if (a < bestAverage)
+        removeMonths.add(str);
+    }
+    for (String m : removeMonths) {
+      sameAverageMonths.remove(m);
     }
 
     return sameAverageMonths;
   }
 
-  String getBestYearlySign(int year) {
-    return "test";
+  String getBestSign(int year) {
+    return "Test sign: test score";
   }
 
   //Bonus task

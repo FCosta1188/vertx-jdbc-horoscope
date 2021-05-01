@@ -2,6 +2,8 @@ package com.main;
 
 import com.mysql.cj.xdevapi.JsonParser;
 import com.operations.PreparedStatementOperation;
+import com.util.DBRow;
+import com.util.Months;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
@@ -72,23 +74,40 @@ public class MainVerticle extends AbstractVerticle {
 			//jo.put("nested json object", joTest);
 
 			if (inputYear != 0) {
-				jo.put("number of records", String.valueOf(pso.selectRows("", "").size()));
+				jo.put("number of database entries in " + inputYear, String.valueOf(pso.selectRows("", "").size()));
+				jo.put("best sign in " + inputYear, horoscope.getBestSign(inputYear));
+
+				//Month score list
+				for (Months month : Months.values()) {
+					JsonObject monthJo = new JsonObject();
+
+					for (int i = 1; i <= month.getMonthDays(inputYear); i++) {
+						DBRow row = pso.selectRow(inputYear, inputSign, month.getMonthName(), i);
+						monthJo.put(String.valueOf(i), "day score " + row.getScore());
+					}
+
+					jo.put(month.getMonthName() + " (" + inputSign + ")" , monthJo);
+				}
+
+
 
 				if (!inputSign.equals("")) {
+					//Best Mont(s) for given sign
 					ArrayList<String> bestMonths = horoscope.getBestMonth(inputYear, inputSign);
 					JsonObject bestMonthsJo = new JsonObject();
 					for (String str : bestMonths) {
 						String[] strArr = str.split(",");
-						bestMonthsJo.put(strArr[0], strArr[1]);
+						bestMonthsJo.put(strArr[0], "average score " + strArr[1]);
 					}
-					jo.put("best month(s)", bestMonthsJo);
+					jo.put("best month(s) for " + inputSign + " in " + inputYear, bestMonthsJo);
 
+					//Sentence for given day
 					if (!inputMonth.equals("") && inputDay != 0) {
-						jo.put("horoscope advice", horoscope.getDailySentence(inputYear, inputSign, inputMonth, inputDay));
-					} else {
-						jo.put("horoscope advice", null);
-					}
-				}
+						jo.put("horoscope advice for " + inputSign + " on " + inputMonth + " " + inputDay + Months.getDaySuffix(String.valueOf(inputDay)) + ", " + inputYear,
+								horoscope.getDailySentence(inputYear, inputSign, inputMonth, inputDay));
+					}//inputMonth != "" AND inputDay != 0
+
+				}//inputSign != 0
 
 			}//inputYear != 0
 
