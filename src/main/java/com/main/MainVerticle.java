@@ -16,6 +16,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class MainVerticle extends AbstractVerticle {
@@ -56,24 +57,42 @@ public class MainVerticle extends AbstractVerticle {
 			PreparedStatementOperation pso = new PreparedStatementOperation();
 
 			JsonObject jo = new JsonObject();
-			JsonObject joTest = new JsonObject();
-			joTest.put("day1", "score1");
-			joTest.put("day2", "score2");
+			//JsonObject joTest = new JsonObject();
+			//joTest.put("day1", "score1");
+			//joTest.put("day2", "score2");
+
+
 
 			jo.put("remote address", address);
-			jo.put("year", queryParams.get("year"));
-			jo.put("sign", queryParams.get("sign"));
-			jo.put("month", queryParams.get("month"));
-			jo.put("day", queryParams.get("day"));
-			jo.put("nested json object", joTest);
-			jo.put("number of records", String.valueOf(pso.selectRows("", "").size()));
-			if (inputYear != 0 && !inputSign.equals("") && !inputMonth.equals("") && inputDay != 0)
-				jo.put("horoscope advice", horoscope.getDailySentence(inputYear, inputSign, inputMonth, inputDay));
-			else
-				jo.put("horoscope advice", null);
-			jo.put("message", msg);
+			jo.put("input year", queryParams.get("year"));
+			jo.put("input sign", queryParams.get("sign"));
+			jo.put("input month", queryParams.get("month"));
+			jo.put("input day", queryParams.get("day"));
+			jo.put("response info", msg);
+			//jo.put("nested json object", joTest);
 
-			context.json(jo);
+			if (inputYear != 0) {
+				jo.put("number of records", String.valueOf(pso.selectRows("", "").size()));
+
+				if (!inputSign.equals("")) {
+					ArrayList<String> bestMonths = horoscope.getBestMonth(inputYear, inputSign);
+					JsonObject bestMonthsJo = new JsonObject();
+					for (String str : bestMonths) {
+						String[] strArr = str.split(",");
+						bestMonthsJo.put(strArr[0], strArr[1]);
+					}
+					jo.put("best month(s)", bestMonthsJo);
+
+					if (!inputMonth.equals("") && inputDay != 0) {
+						jo.put("horoscope advice", horoscope.getDailySentence(inputYear, inputSign, inputMonth, inputDay));
+					} else {
+						jo.put("horoscope advice", null);
+					}
+				}
+
+			}//inputYear != 0
+
+			context.json(jo); //generate json response
 
 			//Save Json to file
 			/*

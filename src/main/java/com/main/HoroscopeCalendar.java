@@ -7,9 +7,12 @@ import com.util.Months;
 import java.awt.image.RasterOp;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class HoroscopeCalendar {
+  private PreparedStatementOperation pso = new PreparedStatementOperation();
 
   private final String[] SIGNS = {
     "Aries",
@@ -66,7 +69,6 @@ public class HoroscopeCalendar {
       return msg;
     }
 
-    PreparedStatementOperation pso = new PreparedStatementOperation();
     ArrayList<DBRow> filteredRows = pso.selectRows("year", String.valueOf(year));
     System.out.println(filteredRows.toString());
 
@@ -93,13 +95,52 @@ public class HoroscopeCalendar {
     return msg;
   }
 
-  double getMonthlyAverage(int year, String sign, String month) {
-    double average = 0;
-    return average;
+  double getMonthlyAverage(int monthlyScoresSum, int monthDays) {
+    return (double) monthlyScoresSum / (double) monthDays;
   }
 
-  String getBestMonth(int year,  String sign) {
-    return "test";
+  double getMonthlyAverage(int[] monthlyScores) {
+    int scoreSum = 0;
+
+    for (int score : monthlyScores) {
+      scoreSum += score;
+    }
+
+    return (double) scoreSum / monthlyScores.length;
+  }
+
+  ArrayList<String> getBestMonth(int year,  String sign) {
+    ArrayList<Double> monthlyAverages = new ArrayList<>();
+    ArrayList<String> sameAverageMonths = new ArrayList<>();
+    String bestMonth = "";
+    double bestAverage = 0;
+
+    for (Months month : Months.values()) {
+      ArrayList<DBRow> monthRows = pso.selectRows(year, sign, month.getMonthName());
+      int monthScoreSum = 0;
+        for (DBRow row : monthRows) {
+          monthScoreSum += row.getScore();
+        }
+
+      monthlyAverages.add(getMonthlyAverage(monthScoreSum, month.getMonthDays(year)));
+      }
+
+    for (Months month : Months.values()) {
+      double average = monthlyAverages.get(month.getMonthNumber() - 1); //ArrayList indexes start from 0, month indexes start from 1
+
+      if (average >= bestAverage) {
+        if (average == bestAverage) {
+          if (sameAverageMonths.size() == 0) //add the initial bestAverage and bestMonth, if it's the first instance of equal averages
+            sameAverageMonths.add(bestMonth + "," + bestAverage);
+
+          sameAverageMonths.add(month.getMonthName() + "," + average);
+        }
+        bestAverage = average;
+        bestMonth = month.getMonthName();
+      }
+    }
+
+    return sameAverageMonths;
   }
 
   String getBestYearlySign(int year) {
@@ -109,7 +150,6 @@ public class HoroscopeCalendar {
   //Bonus task
   String getDailySentence(int year, String sign, String month, int day) {
 
-    PreparedStatementOperation pso = new PreparedStatementOperation();
     DBRow row = pso.selectRow(year, sign, month, day);
 
     return SENTENCE_DAY_QUALITY[row.getScore()-1] + " day ahead, " + SENTENCE_DAY_ACTION[row.getScore()-1];

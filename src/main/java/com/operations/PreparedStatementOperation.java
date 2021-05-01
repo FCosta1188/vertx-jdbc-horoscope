@@ -18,6 +18,8 @@ public class PreparedStatementOperation {
 	private static final String SELECT_ROWS_byMONTH = "SELECT * FROM vertx.horoscope WHERE month = ?";
 	private static final String SELECT_ROWS_byDAY = "SELECT * FROM vertx.horoscope WHERE day = ?";
 	private static final String SELECT_ROWS_bySCORE = "SELECT * FROM vertx.horoscope WHERE score = ?";
+	private static final String SELECT_ROWS_byYEAR_SIGN = "SELECT * FROM vertx.horoscope WHERE year = ? AND sign = ?";
+	private static final String SELECT_ROWS_byYEAR_SIGN_MONTH = "SELECT * FROM vertx.horoscope WHERE year = ? AND sign = ? AND month = ?";
 
 	private static final String INSERT_ROW = "INSERT vertx.horoscope(year,sign,month,day,score) VALUES (?,?,?,?,?)";
 
@@ -119,6 +121,61 @@ public class PreparedStatementOperation {
 			}
 		} catch (SQLException ex) {
 				ex.printStackTrace();
+		}
+		return rows;
+	}//selectRows
+
+	public ArrayList<DBRow> selectRows(int year, String sign) {
+		ArrayList<DBRow> rows = new ArrayList<DBRow>();
+
+		try {
+			if (cxn != null) {
+				PreparedStatement pstmt = cxn.prepareStatement(SELECT_ROWS_byYEAR_SIGN);
+				pstmt.setInt(1, year);
+				pstmt.setString(2, sign);
+				ResultSet rs = pstmt.executeQuery();
+
+				while (rs.next()) {
+					rows.add(new DBRow(
+							rs.getInt("id"),
+							rs.getInt("year"),
+							rs.getString("sign"),
+							rs.getString("month"),
+							rs.getInt("day"),
+							rs.getInt("score")
+					));
+				}
+			}
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+		}
+		return rows;
+	}//selectRows
+
+	public ArrayList<DBRow> selectRows(int year, String sign, String month) {
+		ArrayList<DBRow> rows = new ArrayList<DBRow>();
+
+		try {
+			if (cxn != null) {
+				PreparedStatement pstmt = cxn.prepareStatement(SELECT_ROWS_byYEAR_SIGN_MONTH);
+				pstmt.setInt(1, year);
+				pstmt.setString(2, sign);
+				pstmt.setString(3, month);
+				ResultSet rs = pstmt.executeQuery();
+
+				while (rs.next()) {
+					rows.add(new DBRow(
+							rs.getInt("id"),
+							rs.getInt("year"),
+							rs.getString("sign"),
+							rs.getString("month"),
+							rs.getInt("day"),
+							rs.getInt("score")
+					));
+				}
+			}
+		} catch (SQLException ex) {
+			ex.printStackTrace();
 		}
 		return rows;
 	}//selectRows
