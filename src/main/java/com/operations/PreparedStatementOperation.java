@@ -32,7 +32,7 @@ public class PreparedStatementOperation {
 
 		try {
 			cxn = DBConnection.getConnection();
-			System.out.println("PSO connection success");
+			System.out.println("PreparedStatementOperation: DB connection success");
 		} catch (SQLException ex) {
 				ex.printStackTrace();
 		}

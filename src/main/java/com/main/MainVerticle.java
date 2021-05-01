@@ -1,5 +1,6 @@
 package com.main;
 
+import com.mysql.cj.util.StringUtils;
 import com.mysql.cj.xdevapi.JsonParser;
 import com.operations.PreparedStatementOperation;
 import com.util.DBRow;
@@ -18,7 +19,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.*;
+import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class MainVerticle extends AbstractVerticle {
@@ -36,63 +39,108 @@ public class MainVerticle extends AbstractVerticle {
 			String address = context.request().connection().remoteAddress().toString();
 			MultiMap queryParams = context.queryParams();
 
+			//Get and validate user input query parameters
 			int inputYear = 0;
 			String inputSign = "";
 			String inputMonth = "";
 			int inputDay = 0;
 
+			//year
 			if (queryParams.get("year") == null) {
-				msg = "Please insert year!";
+				msg = "Year cannot be empty!";
 			} else {
-				inputYear = Integer.parseInt(queryParams.get("year"));
+				if(!StringUtils.isStrictlyNumeric(String.valueOf(queryParams.get("year")))) {
+					msg = "Invalid input year: not an integer number";
+				} else {
+					inputYear = Integer.parseInt(queryParams.get("year"));
+					msg = horoscope.generateYearlyCalendar(inputYear);
+				}
 
-				if(queryParams.get("sign") != null)
-					inputSign = queryParams.get("sign");
-				if(queryParams.get("month") != null)
-					inputMonth = queryParams.get("month");
-				if(queryParams.get("day") != null)
-					inputDay = Integer.parseInt(queryParams.get("day"));
+				//sign
+				if(queryParams.get("sign") != null) {
+					String[] signs = horoscope.getSIGNS();
+					for (String s : signs) {
+						if (s.toLowerCase().equals(queryParams.get("sign").toLowerCase())) {
+							inputSign = queryParams.get("sign");
+							break;
+						}
+					}
 
-				msg = horoscope.generateYearlyCalendar(inputYear);
-			}
+					if (inputSign.equals(""))
+						msg += "; invalid input sign (valid options: " + Arrays.toString(signs) + ")";
+				}//input sign not null
 
-			PreparedStatementOperation pso = new PreparedStatementOperation();
+				//month
+				if(queryParams.get("month") != null) {
+					for (Months m : Months.values()) {
+						if (m.getMonthName().toLowerCase().equals(queryParams.get("month").toLowerCase())) {
+							inputMonth = queryParams.get("month");
+							break;
+						}
+					}
+
+					if (inputMonth.equals(""))
+						msg += "; invalid input month";
+				}//input month not null
+
+				//day
+				if(queryParams.get("day") != null) {
+					if(!StringUtils.isStrictlyNumeric(String.valueOf(queryParams.get("day")))) {
+						msg += "; invalid input day: not an integer number";
+					} else {
+						if (!inputMonth.equals("")) {
+							for (Months m : Months.values()) {
+								if (inputMonth.toLowerCase().equals(m.getMonthName().toLowerCase()) && Integer.parseInt(queryParams.get("day")) >= 1 && Integer.parseInt(queryParams.get("day")) <= m.getMonthDays(inputYear))
+									inputDay = Integer.parseInt(queryParams.get("day"));
+							}
+						}
+					}
+
+					if (inputDay == 0) {
+						msg += "; invalid input day for " + inputMonth + " " + inputYear;
+					}
+				}//input day not null
+
+			}//input year not null
 
 			JsonObject jo = new JsonObject();
-			//JsonObject joTest = new JsonObject();
-			//joTest.put("day1", "score1");
-			//joTest.put("day2", "score2");
-
-
-
 			jo.put("remote address", address);
 			jo.put("input year", queryParams.get("year"));
 			jo.put("input sign", queryParams.get("sign"));
 			jo.put("input month", queryParams.get("month"));
 			jo.put("input day", queryParams.get("day"));
 			jo.put("response info", msg);
-			//jo.put("nested json object", joTest);
 
+			PreparedStatementOperation pso = new PreparedStatementOperation();
+
+			//valid input year
 			if (inputYear != 0) {
 				jo.put("number of database entries in " + inputYear, String.valueOf(pso.selectRows("", "").size()));
-				jo.put("best sign in " + inputYear, horoscope.getBestSign(inputYear));
 
-				//Month score list
-				for (Months month : Months.values()) {
-					JsonObject monthJo = new JsonObject();
+				//Best sign(s) for given year
+				ArrayList<String> bestSigns = horoscope.getBestSign(inputYear);
+				JsonObject bestSignsJo = new JsonObject();
+				for (String str : bestSigns) {
+					String[] strArr = str.split(",");
+					bestSignsJo.put(strArr[0], "average score " + strArr[1]);
+				}
+				jo.put("best sign(s) in " + inputYear, bestSignsJo);
 
-					for (int i = 1; i <= month.getMonthDays(inputYear); i++) {
-						DBRow row = pso.selectRow(inputYear, inputSign, month.getMonthName(), i);
-						monthJo.put(String.valueOf(i), "day score " + row.getScore());
+				//valid input sign
+				if (!inputSign.equals("")) {
+					//Month score list
+					for (Months month : Months.values()) {
+						JsonObject monthJo = new JsonObject();
+
+						for (int i = 1; i <= month.getMonthDays(inputYear); i++) {
+							DBRow row = pso.selectRow(inputYear, inputSign, month.getMonthName(), i);
+							monthJo.put(String.valueOf(i), "day score " + row.getScore());
+						}
+
+						jo.put(month.getMonthName() + " (" + inputSign + ")" , monthJo);
 					}
 
-					jo.put(month.getMonthName() + " (" + inputSign + ")" , monthJo);
-				}
-
-
-
-				if (!inputSign.equals("")) {
-					//Best Mont(s) for given sign
+					//Best mont(s) for given sign
 					ArrayList<String> bestMonths = horoscope.getBestMonth(inputYear, inputSign);
 					JsonObject bestMonthsJo = new JsonObject();
 					for (String str : bestMonths) {
@@ -101,15 +149,16 @@ public class MainVerticle extends AbstractVerticle {
 					}
 					jo.put("best month(s) for " + inputSign + " in " + inputYear, bestMonthsJo);
 
-					//Sentence for given day
+					//valid input month and day
 					if (!inputMonth.equals("") && inputDay != 0) {
+						//Sentence for given day
 						jo.put("horoscope advice for " + inputSign + " on " + inputMonth + " " + inputDay + Months.getDaySuffix(String.valueOf(inputDay)) + ", " + inputYear,
 								horoscope.getDailySentence(inputYear, inputSign, inputMonth, inputDay));
-					}//inputMonth != "" AND inputDay != 0
+					}//valid input month and day
 
-				}//inputSign != 0
+				}//valid input sign
 
-			}//inputYear != 0
+			}//valid input year
 
 			context.json(jo); //generate json response
 
