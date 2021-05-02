@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.Scanner;
 
 public class MainProgram {
   public static void main(String[] args) throws SQLException {
@@ -19,8 +20,7 @@ public class MainProgram {
     System.out.println("=====Main Program: START=====");
 
     DBConnection dbc = new DBConnection();
-    System.out.println("-----------------");
-    System.out.println("DB Connection test: " + dbc.getConnection());
+    System.out.println("DB Connection: " + dbc.getConnection());
 
     Vertx vertx = Vertx.vertx();
     vertx.deployVerticle(new MainVerticle());

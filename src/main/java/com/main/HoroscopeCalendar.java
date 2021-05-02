@@ -26,37 +26,63 @@ public class HoroscopeCalendar {
     "Pisces"
   };
 
-  private final String[] SENTENCE_DAY_QUALITY_bySCORE = {
-          "Awful,Horrible,Atrocious", //day score = 1
-          "Terrible,test2,test3",//2
-          "Shitty,test2,test3",//3
-          "Bad,test2,test3",//4
-          "Regular,test2,test3",//5
-          "Excellent,test2,test3",//6
-          "Great,test2,test3",//7
-          "Awesome,test2,test3",//8
-          "Incredible,test2,test3",//9
-          "Superb,test2,test3",//10
+  private final String[] SENTENCE_DAY_QUALITY = {
+    "Awful,Horrible,Atrocious", //day score = 1
+    "Terrible,Dreadful,Adverse",//2
+    "Very bad,Unlucky,Unfavourable",//3
+    "Bad,Nasty,Unpleasant",//4
+    "Regular,Normal,Average",//5
+    "Easy,Good,Nice",//6
+    "Great,Very good,Very nice",//7
+    "Awesome,Beautiful,Excellent",//8
+    "Incredible,Marvelous,Outstanding",//9
+    "Superb,Uncanny,Astonishing",//10
   };
 
-  private final String[] SENTENCE_SUBJECTS = {"a pidgeon", "a lion", "a friend"};
+  private final String[] SENTENCE_SUBJECTS = {
+    "an asteroid,a lion,the police", //day score = 1
+    "a shark,the doctor,a bus",//2
+    "a gangster,a snake,a truck",//3
+    "a pidgeon,a jerk,a taxi",//4
+    "a bully,a stranger,a train",//5
+    "a butterfly,a comedian,a boat",//6
+    "a dog,your mom,a superhero",//7
+    "a celebrity,a dragon,an alien",//8
+    "a friend,a model,the government",//9
+    "the love of your life,your family,your best friend",//10
+  };
 
-  private final String[] SENTENCE_OBJECTS = {"your head", "your car", "your wife"};
+  private final String[] SENTENCE_VERBS = {
+    "shit on,eat,beat", //day score = 1
+    "lose,worsen,kidnap",//2
+    "cry,decrease,hurt",//3
+    "forget,run over,crash on",//4
+    "bite,punish,fight",//5
+    "increase,repay,encourage",//6
+    "improve,offer,motivate",//7
+    "kiss,dream,reward",//8
+    "give,award,honor",//9
+    "win,love,donate",//10
+  };
 
-  private final String[] SENTENCE_DAY_VERB_bySCORE = {
-          "shit on, eat, fuck", //day score = 1
-          "test1,test2,test3",//2
-          "test1,test2,test3",//3
-          "test1,test2,test3",//4
-          "test1,test2,test3",//5
-          "test1,test2,test3",//6
-          "test1,test2,test3",//7
-          "test1,test2,test3",//8
-          "test1,test2,test3",//9
-          "test1,test2,test3",//10
+  private final String[] SENTENCE_OBJECTS = {
+    "you,your money,your partner", //day score = 1
+    "you,your head,a stinky sock",//2
+    "you,your legs,a broken car",//3
+    "you,your head,a rotten apple",//4
+    "you,your head,a pineapple pizza",//5
+    "you,your muscles,a concert",//6
+    "you,a motorbike,a gift",//7
+    "you,a pool,your brain",//8
+    "you,the lottery,a villa",//9
+    "you,a lot of money,a house",//10
   };
 
   public HoroscopeCalendar() {
+  }
+
+  public PreparedStatementOperation getPso() {
+    return pso;
   }
 
   public String[] getSIGNS() {
@@ -113,6 +139,7 @@ public class HoroscopeCalendar {
     return msg;
   }
 
+  //Shows which Zodiac sign has the best score overall for a given year.
   ArrayList<String> getBestSign(int year) {
     ArrayList<String> signAverages = new ArrayList<>();
     ArrayList<String> bestAverageSigns = new ArrayList<>();
@@ -159,6 +186,7 @@ public class HoroscopeCalendar {
     return bestAverageSigns;
   }
 
+  //Shows which month is the best on average (by score) for a Zodiac sign in a given year.
   ArrayList<String> getBestMonth(int year,  String sign) {
     ArrayList<Integer> monthlyAverages = new ArrayList<>();
     ArrayList<String> bestAverageMonths = new ArrayList<>();
@@ -202,30 +230,33 @@ public class HoroscopeCalendar {
     return bestAverageMonths;
   }
 
-  //Bonus task
+  //Bonus task: generate a sentence that describes what happens to an astrological sign on a given day.
   String getDailySentence(int year, String sign, String month, int day) {
     DBRow dayRow = pso.selectRow(year, sign, month, day);
     Random rnd = new Random(System.currentTimeMillis());
 
     //day
-    String dayQualityStr = SENTENCE_DAY_QUALITY_bySCORE[dayRow.getScore()-1];
+    String dayQualityStr = SENTENCE_DAY_QUALITY[dayRow.getScore()-1];
     String[] dayQualityStrArr = dayQualityStr.split(",");
     String dayQuality = dayQualityStrArr[rnd.nextInt(3)];
 
     //subj
-    String[] subjStrArr = SENTENCE_SUBJECTS;
+    String subjStr = SENTENCE_SUBJECTS[dayRow.getScore()-1];
+    String[] subjStrArr = subjStr.split(",");
     String subj = subjStrArr[rnd.nextInt(3)];
 
+
     //verb
-    String verbStr = SENTENCE_DAY_VERB_bySCORE[dayRow.getScore()-1];
+    String verbStr = SENTENCE_VERBS[dayRow.getScore()-1];
     String[] verbStrArr = verbStr.split(",");
     String verb = verbStrArr[rnd.nextInt(3)];
 
     //obj
-    String[] objStrArr = SENTENCE_OBJECTS;
+    String objStr = SENTENCE_OBJECTS[dayRow.getScore()-1];
+    String[] objStrArr = objStr.split(",");
     String obj = objStrArr[rnd.nextInt(3)];
 
-    return dayQuality + " day: " + subj + " will " + verb + " " + obj;
+    return dayQuality + " day: " + subj + " will " + verb + " " + obj + ".";
   }
 
 }//HoroscopeCalendar
