@@ -13,8 +13,8 @@ public class DBConnection {
   }
 
   public static Connection getConnection() throws SQLException {
-    //Singleton pattern: creating connections is costly in terms of resources, therefore it is a good practice to create a connection only once
-    if (connection == null) { //If connection is null, create a new one
+    //Singleton pattern: create a connection only if it does not exists yet (to avoid multiple unnecessary connections)
+    if (connection == null) {
       try {
         final String url = "jdbc:mysql://localhost:3306";
         final String user = "root";

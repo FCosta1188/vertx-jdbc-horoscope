@@ -1,18 +1,8 @@
 package com.main;
 
-import com.operations.PreparedStatementOperation;
-import com.util.Months;
 import io.vertx.core.Vertx;
 import com.util.DBConnection;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-import io.vertx.core.spi.json.JsonCodec;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.Scanner;
 
 public class MainProgram {
   public static void main(String[] args) throws SQLException {

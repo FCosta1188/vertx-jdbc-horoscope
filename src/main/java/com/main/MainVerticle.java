@@ -1,29 +1,15 @@
 package com.main;
 
 import com.mysql.cj.util.StringUtils;
-import com.mysql.cj.xdevapi.JsonParser;
-import com.operations.PreparedStatementOperation;
 import com.util.DBRow;
 import com.util.Months;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.MultiMap;
 import io.vertx.core.Promise;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.impl.JsonUtil;
-import io.vertx.core.spi.JsonFactory;
-import io.vertx.core.spi.json.JsonCodec;
 import io.vertx.ext.web.Router;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.*;
-import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class MainVerticle extends AbstractVerticle {
 

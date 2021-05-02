@@ -2,7 +2,6 @@ package com.operations;
 
 import com.util.DBConnection;
 import com.util.DBRow;
-
 import java.sql.*;
 import java.util.ArrayList;
 
@@ -27,16 +26,12 @@ public class PreparedStatementOperation {
 
 	//Constructor
 	public PreparedStatementOperation() {
-
-		String msg = "";
-
 		try {
 			cxn = DBConnection.getConnection();
 			System.out.println("PreparedStatementOperation: DB connection success");
 		} catch (SQLException ex) {
 				ex.printStackTrace();
 		}
-
 	}
 
 	public DBRow selectRow(int year, String sign, String month, int day) {
